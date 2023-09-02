@@ -89,6 +89,8 @@ export class UserService {
 
     private readonly emailOneTimePasscodeMaxAttempts = 5;
 
+    private ownIdRecords: Record<string, string> = {}; // TODO: move this to DB
+
     constructor({
         inviteLinkModel,
         userModel,
@@ -114,6 +116,30 @@ export class UserService {
         this.personalAccessTokenModel = personalAccessTokenModel;
         this.organizationAllowedEmailDomainsModel =
             organizationAllowedEmailDomainsModel;
+    }
+
+    async saveOwnIdData(email: string, ownIdData: string): Promise<void> {
+        this.ownIdRecords[email] = ownIdData;
+    }
+
+    async getOwnIdData(email: string): Promise<string | undefined> {
+        return this.ownIdRecords[email];
+    }
+
+    async getUserByEmailAndOwnIdData(
+        email: string,
+        ownIdData: string,
+    ): Promise<SessionUser> {
+        const isEmailAndOwnIdDataValid =
+            (await this.getOwnIdData(email)) === ownIdData;
+        if (!isEmailAndOwnIdDataValid) {
+            throw new AuthorizationError('Email and ownIdData not recognized');
+        }
+        const user = await this.userModel.findSessionUserByPrimaryEmail(email);
+        if (!user) {
+            throw new AuthorizationError('User not found');
+        }
+        return user;
     }
 
     private async tryVerifyUserEmail(
@@ -584,7 +610,7 @@ export class UserService {
     async registerOrActivateUser(
         user: RegisterOrActivateUser,
     ): Promise<SessionUser> {
-        let lightdashUser;
+        let lightdashUser: LightdashUser;
         if (hasInviteCode(user)) {
             lightdashUser = await this.activateUserFromInvite(user.inviteCode, {
                 firstName: user.firstName,
@@ -598,6 +624,9 @@ export class UserService {
                 email: user.email,
                 password: user.password,
             });
+        }
+        if (user.ownIdData && lightdashUser.email) {
+            await this.saveOwnIdData(lightdashUser.email, user.ownIdData);
         }
 
         return this.userModel.findSessionUserByUUID(lightdashUser.userUuid);

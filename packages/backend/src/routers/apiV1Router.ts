@@ -6,6 +6,7 @@ import {
     redirectOIDCSuccess,
     storeOIDCRedirect,
 } from '../controllers/authentication';
+import { userModel } from '../models/models';
 import { UserModel } from '../models/UserModel';
 import { healthService, userService } from '../services/services';
 import { analyticsRouter } from './analyticsRouter';
@@ -175,3 +176,44 @@ apiV1Router.use('/jobs', jobsRouter);
 apiV1Router.use('/slack', slackRouter);
 apiV1Router.use('/headless-browser', headlessBrowserRouter);
 apiV1Router.use('/analytics', analyticsRouter);
+
+// OwnId routes
+apiV1Router.post('/setOwnIDDataByLoginId', async (req, res) => {
+    const email = req.body.loginId; // The unique id of a user in your database, usually email or phone
+    const { ownIdData } = req.body; // OwnID authentication information as string
+    await userService.saveOwnIdData(email, ownIdData);
+    return res.sendStatus(204);
+});
+
+apiV1Router.post('/getOwnIDDataByLoginId', async (req, res) => {
+    const email = req.body.loginId; // The unique id of a user in your database, usually email or phone
+    const ownIdData = await userService.getOwnIdData(email);
+    if (!ownIdData) {
+        return res.json({ errorCode: 404 });
+    } // Error code when user doesn't exist
+    return res.json({ ownIdData }); // OwnID authentication information as string
+});
+
+apiV1Router.post('/getSessionByLoginId', async (req, res) => {
+    const email: string = req.body.loginId; // The unique id of a user in your database, usually email or phone
+    const user = await userModel.findUserByEmail(email);
+    const ownIdData = await userService.getOwnIdData(email);
+    if (!user || !ownIdData) {
+        return res.json({ errorCode: 404 });
+    } // Error code when user doesn't exist
+    return res.json({ email, ownIdData });
+});
+
+apiV1Router.post('/loginWithOwnIdData', async (req, res, next) => {
+    const { email, ownIdData } = req.body;
+    const user = await userService.getUserByEmailAndOwnIdData(email, ownIdData);
+    req.login(user, (err) => {
+        if (err) {
+            next(err);
+        }
+        res.json({
+            status: 'ok',
+            results: user,
+        });
+    });
+});

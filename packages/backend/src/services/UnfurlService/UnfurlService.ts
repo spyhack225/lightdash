@@ -410,7 +410,7 @@ export class UnfurlService {
         };
     }
 
-    private async getUserCookie(userUuid: string): Promise<string> {
+    async getUserCookie(userUuid: string): Promise<string> {
         const token = getAuthenticationToken(userUuid);
 
         const response = await fetch(

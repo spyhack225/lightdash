@@ -1824,7 +1824,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     SupportedDbtVersions: {
         dataType: 'refEnum',
-        enums: ['v1.4', 'v1.5'],
+        enums: ['v1.4', 'v1.5', 'v1.6'],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     Project: {
@@ -3170,6 +3170,7 @@ const models: TsoaRoute.Models = {
                     dataType: 'nestedObjectLiteral',
                     nestedProperties: {
                         inviteCode: { dataType: 'string', required: true },
+                        ownIdData: { dataType: 'string' },
                     },
                 },
             ],
@@ -3194,6 +3195,7 @@ const models: TsoaRoute.Models = {
         type: {
             dataType: 'nestedObjectLiteral',
             nestedProperties: {
+                ownIdData: { dataType: 'string' },
                 password: { dataType: 'string', required: true },
                 email: { ref: 'Email', required: true },
                 lastName: { dataType: 'string', required: true },

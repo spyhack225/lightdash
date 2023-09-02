@@ -156,12 +156,18 @@ const Invite: FC = () => {
         <CreateUserForm
             isLoading={isLoading || isSuccess}
             readOnlyEmail={inviteLinkQuery.data?.email}
-            onSubmit={({ firstName, lastName, password }: CreateUserArgs) => {
+            onSubmit={({
+                firstName,
+                lastName,
+                password,
+                ownIdData,
+            }: CreateUserArgs) => {
                 mutate({
                     inviteCode,
                     firstName,
                     lastName,
                     password,
+                    ownIdData,
                 });
             }}
         />

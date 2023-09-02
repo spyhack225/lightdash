@@ -1,4 +1,5 @@
 import { Ability } from '@casl/ability';
+import { OwnIDInit } from '@ownid/react';
 
 import { Helmet } from 'react-helmet';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -47,7 +48,7 @@ const App = () => (
         <Helmet>
             <title>Lightdash</title>
         </Helmet>
-
+        <OwnIDInit config={{ appId: 'fdofmj71kzffu4' }} />
         <QueryClientProvider client={queryClient}>
             <MantineProvider>
                 <BlueprintProvider>

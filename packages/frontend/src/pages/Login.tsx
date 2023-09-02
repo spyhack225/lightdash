@@ -9,8 +9,10 @@ import {
 } from '@lightdash/common';
 import {
     Anchor,
+    Box,
     Button,
     Card,
+    Flex,
     Image,
     PasswordInput,
     Stack,
@@ -18,7 +20,8 @@ import {
     Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { FC, useEffect } from 'react';
+import { OwnID } from '@ownid/react';
+import { FC, useEffect, useRef } from 'react';
 import { useMutation } from 'react-query';
 import { Redirect, useLocation } from 'react-router-dom';
 
@@ -45,6 +48,7 @@ const Login: FC = () => {
     const location = useLocation<{ from?: Location } | undefined>();
     const { health } = useApp();
     const { showToastError } = useToaster();
+    const emailField = useRef(null);
     const form = useForm<LoginParams>({
         initialValues: {
             email: '',
@@ -78,6 +82,18 @@ const Login: FC = () => {
             });
         },
     });
+
+    function onLogin(data: any) {
+        lightdashApi({
+            method: 'POST',
+            url: `/loginWithOwnIdData`,
+            body: JSON.stringify(data),
+        }).then(() => {
+            window.location.href = location.state?.from
+                ? `${location.state.from.pathname}${location.state.from.search}`
+                : '/';
+        });
+    }
 
     const allowPasswordAuthentication =
         !health.data?.auth.disablePasswordAuthentication;
@@ -130,6 +146,7 @@ const Login: FC = () => {
         <form name="login" onSubmit={form.onSubmit((values) => mutate(values))}>
             <Stack spacing="lg">
                 <TextInput
+                    ref={emailField}
                     label="Email address"
                     name="email"
                     placeholder="Your email address"
@@ -137,14 +154,33 @@ const Login: FC = () => {
                     {...form.getInputProps('email')}
                     disabled={isLoading || isSuccess}
                 />
-                <PasswordInput
-                    label="Password"
-                    name="password"
-                    placeholder="Your password"
-                    required
-                    {...form.getInputProps('password')}
-                    disabled={isLoading || isSuccess}
-                />
+                <Flex>
+                    <Box
+                        w="72px"
+                        mr="10px"
+                        sx={{
+                            position: 'relative',
+                        }}
+                    >
+                        <OwnID
+                            type="login"
+                            loginIdField={emailField}
+                            onError={(error) => console.error(error)}
+                            onLogin={onLogin}
+                        />
+                    </Box>
+                    <PasswordInput
+                        sx={{
+                            flex: 1,
+                        }}
+                        label="Password"
+                        name="password"
+                        placeholder="Your password"
+                        required
+                        {...form.getInputProps('password')}
+                        disabled={isLoading || isSuccess}
+                    />
+                </Flex>
                 <Button
                     type="submit"
                     loading={isLoading || isSuccess}
@@ -152,6 +188,7 @@ const Login: FC = () => {
                 >
                     Sign in
                 </Button>
+
                 {health.data?.hasEmailClient && (
                     <Anchor href="/recover-password" mx="auto">
                         Forgot your password?

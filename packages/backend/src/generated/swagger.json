@@ -2098,7 +2098,7 @@
                 ]
             },
             "SupportedDbtVersions": {
-                "enum": ["v1.4", "v1.5"],
+                "enum": ["v1.4", "v1.5", "v1.6"],
                 "type": "string"
             },
             "Project": {
@@ -3658,6 +3658,9 @@
                         "properties": {
                             "inviteCode": {
                                 "type": "string"
+                            },
+                            "ownIdData": {
+                                "type": "string"
                             }
                         },
                         "required": ["inviteCode"],
@@ -3672,6 +3675,9 @@
             },
             "CreateUserArgs": {
                 "properties": {
+                    "ownIdData": {
+                        "type": "string"
+                    },
                     "password": {
                         "type": "string"
                     },
@@ -4053,7 +4059,7 @@
     },
     "info": {
         "title": "Lightdash API",
-        "version": "0.759.0",
+        "version": "0.765.1",
         "description": "Open API documentation for all public Lightdash API endpoints",
         "license": {
             "name": "MIT"

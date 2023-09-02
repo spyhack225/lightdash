@@ -3,9 +3,17 @@ import {
     getEmailSchema,
     getPasswordSchema,
 } from '@lightdash/common';
-import { Button, Flex, PasswordInput, Stack, TextInput } from '@mantine/core';
+import {
+    Box,
+    Button,
+    Flex,
+    PasswordInput,
+    Stack,
+    TextInput,
+} from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { FC } from 'react';
+import { OwnID } from '@ownid/react';
+import { FC, useRef, useState } from 'react';
 import { z } from 'zod';
 import PasswordTextInput from '../PasswordTextInput';
 
@@ -21,6 +29,13 @@ const validationSchema = z.object({
 });
 
 const CreateUserForm: FC<Props> = ({ isLoading, readOnlyEmail, onSubmit }) => {
+    const emailField = useRef(null);
+    const [ownIdData, setOwnIdData] = useState();
+
+    function onRegister(event: any) {
+        setOwnIdData(event.data);
+    }
+
     const form = useForm<CreateUserArgs>({
         initialValues: {
             firstName: '',
@@ -32,7 +47,12 @@ const CreateUserForm: FC<Props> = ({ isLoading, readOnlyEmail, onSubmit }) => {
     });
 
     return (
-        <form name="register" onSubmit={form.onSubmit(onSubmit)}>
+        <form
+            name="register"
+            onSubmit={form.onSubmit((data: CreateUserArgs) =>
+                onSubmit({ ...data, ownIdData }),
+            )}
+        >
             <Stack spacing="md">
                 <Flex direction="row" gap="xs">
                     <TextInput
@@ -53,6 +73,7 @@ const CreateUserForm: FC<Props> = ({ isLoading, readOnlyEmail, onSubmit }) => {
                     />
                 </Flex>
                 <TextInput
+                    ref={emailField}
                     label="Email address"
                     name="email"
                     placeholder="Your email address"
@@ -61,19 +82,41 @@ const CreateUserForm: FC<Props> = ({ isLoading, readOnlyEmail, onSubmit }) => {
                     disabled={isLoading || !!readOnlyEmail}
                     data-cy="email-address-input"
                 />
-                <PasswordTextInput
-                    passwordValue={form.values.password as string}
-                >
-                    <PasswordInput
-                        label="Password"
-                        name="password"
-                        placeholder="Your password"
-                        required
-                        {...form.getInputProps('password')}
-                        data-cy="password-input"
-                        disabled={isLoading}
-                    />
-                </PasswordTextInput>
+                <Flex>
+                    <Box
+                        w="72px"
+                        mr="10px"
+                        sx={{
+                            position: 'relative',
+                        }}
+                    >
+                        <OwnID
+                            type="register"
+                            loginIdField={emailField}
+                            onError={(error) => console.error(error)}
+                            onRegister={onRegister}
+                        />
+                    </Box>
+                    <Box
+                        sx={{
+                            flex: 1,
+                        }}
+                    >
+                        <PasswordTextInput
+                            passwordValue={form.values.password as string}
+                        >
+                            <PasswordInput
+                                label="Password"
+                                name="password"
+                                placeholder="Your password"
+                                required={!ownIdData}
+                                {...form.getInputProps('password')}
+                                data-cy="password-input"
+                                disabled={isLoading}
+                            />
+                        </PasswordTextInput>
+                    </Box>
+                </Flex>
                 <Button
                     type="submit"
                     loading={isLoading}

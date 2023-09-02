@@ -392,6 +392,7 @@ export type CreateUserArgs = {
     lastName: string;
     email: Email;
     password: string;
+    ownIdData?: string;
 };
 
 export type CreateUserWithRole = {
@@ -403,6 +404,7 @@ export type CreateUserWithRole = {
 };
 
 export type ActivateUserWithInviteCode = ActivateUser & {
+    ownIdData?: string;
     inviteCode: string;
 };
 

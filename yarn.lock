@@ -3703,6 +3703,11 @@
   resolved "https://registry.npmjs.org/@opentelemetry/semantic-conventions/-/semantic-conventions-1.13.0.tgz"
   integrity sha512-LMGqfSZkaMQXqewO0o1wvWr/2fQdCh4a3Sqlxka/UsJCe0cfLulh6x2aqnKLnsrSGiCq5rSCwvINd152i0nCqw==
 
+"@ownid/react@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@ownid/react/-/react-1.6.0.tgz#dc73b0b01d6d9b0176e612a4a085c8efedb38dd5"
+  integrity sha512-yXe8W/waBPkHMcMXrZ7iFdKyrVgSfHzuRT9ILy1S7TrYv+3xg5TAMarITMVVE7foDaPR+3hJHoH1QhjunV95lw==
+
 "@popperjs/core@^2.11.6":
   version "2.11.6"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.6.tgz"
