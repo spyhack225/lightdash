@@ -7,12 +7,13 @@ import {
 import { Alert, Box, Group, Stack, Tabs } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMount } from 'react-use';
 
 import { downloadCsvFromSqlRunner } from '../api/csv';
 import { ChartDownloadMenu } from '../components/ChartDownload';
+import { BigButton } from '../components/common/BigButton';
 import CollapsableCard from '../components/common/CollapsableCard';
 import Page from '../components/common/Page/Page';
 import PageBreadcrumbs from '../components/common/PageBreadcrumbs';
@@ -34,6 +35,7 @@ import {
     ProjectCatalogTreeNode,
     useProjectCatalogTree,
 } from '../hooks/useProjectCatalogTree';
+import { useCreateMutation } from '../hooks/useSavedQuery';
 import { useSqlQueryMutation } from '../hooks/useSqlQuery';
 import useSqlQueryVisualization from '../hooks/useSqlQueryVisualization';
 import {
@@ -94,6 +96,22 @@ const SqlRunnerPage = () => {
         initialState: initialState?.createSavedChart,
         sqlQueryMutation,
     });
+
+    const { mutate: createChartMutate, isLoading: isSaving } =
+        useCreateMutation();
+
+    const saveChart = useCallback(() => {
+        if (createSavedChart) {
+            createChartMutate({
+                name: 'Chart from SQL Runner',
+                description: 'Chart from SQL Runner',
+                type: 'sql_runner',
+                sql,
+                explore,
+                ...createSavedChart,
+            });
+        }
+    }, [createChartMutate, createSavedChart, sql, explore]);
 
     const sqlRunnerState = useMemo(
         () => ({
@@ -237,6 +255,14 @@ const SqlRunnerPage = () => {
                             onSubmit={handleSubmit}
                             isLoading={isLoading}
                         />
+                        <BigButton
+                            icon="saved"
+                            style={{ width: 150 }}
+                            onClick={saveChart}
+                            loading={isSaving}
+                        >
+                            Save
+                        </BigButton>
                         <ShareShortLinkButton
                             disabled={lastSqlRan === undefined}
                         />

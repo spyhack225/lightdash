@@ -204,6 +204,7 @@ const ValidDashboardChartTile: FC<{
             isLoading={isLoading}
             onSeriesContextMenu={onSeriesContextMenu}
             columnOrder={data.tableConfig.columnOrder}
+            isSqlRunner={data.type === 'sql_runner'}
         >
             <LightdashVisualization
                 isDashboard

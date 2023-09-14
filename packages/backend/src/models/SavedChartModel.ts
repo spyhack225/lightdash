@@ -29,12 +29,14 @@ import { ProjectTableName } from '../database/entities/projects';
 import {
     CreateDbSavedChartVersionField,
     CreateDbSavedChartVersionSort,
+    CreateSavedChartVersionSqlRunner,
     DBFilteredAdditionalMetrics,
     DbSavedChartAdditionalMetricInsert,
     DbSavedChartTableCalculationInsert,
     InsertChart,
     SavedChartAdditionalMetricTableName,
     SavedChartsTableName,
+    SavedChartVersionSqlRunnerTableName,
 } from '../database/entities/savedCharts';
 import {
     getFirstAccessibleSpace,
@@ -63,6 +65,18 @@ type DbSavedChartDetails = {
     last_name: string;
     pinned_list_uuid: string;
     dashboard_uuid: string | null;
+    sql: string | null;
+    type: 'explorer' | 'sql_runner';
+};
+
+const createSavedChartVersionsSqlRunner = async (
+    trx: Knex,
+    data: CreateSavedChartVersionSqlRunner,
+) => {
+    const results = await trx(SavedChartVersionSqlRunnerTableName)
+        .insert(data)
+        .returning('*');
+    return results[0];
 };
 
 const createSavedChartVersionField = async (
@@ -122,6 +136,8 @@ const createSavedChartVersion = async (
         chartConfig,
         tableConfig,
         pivotConfig,
+        sql,
+        explore,
         updatedByUser,
     }: CreateSavedChartVersion,
 ): Promise<void> => {
@@ -212,6 +228,16 @@ const createSavedChartVersion = async (
                 }),
             );
         });
+        if (sql && explore) {
+            promises.push(
+                createSavedChartVersionsSqlRunner(trx, {
+                    saved_queries_version_id: version.saved_queries_version_id,
+                    sql,
+                    explore_name: explore.name,
+                    explore: JSON.stringify(explore),
+                }),
+            );
+        }
         await Promise.all(promises);
     });
 };
@@ -223,7 +249,10 @@ export const createSavedChart = async (
     {
         name,
         description,
+        type,
         tableName,
+        sql,
+        explore,
         metricQuery,
         chartConfig,
         tableConfig,
@@ -238,6 +267,7 @@ export const createSavedChart = async (
         const baseChart = {
             name,
             description,
+            type,
             last_version_chart_kind:
                 getChartKind(chartConfig.type, chartConfig.config) ||
                 ChartKind.VERTICAL_BAR,
@@ -270,6 +300,8 @@ export const createSavedChart = async (
             chartConfig,
             tableConfig,
             pivotConfig,
+            sql,
+            explore,
             updatedByUser,
         });
         return newSavedChart.saved_query_uuid;
@@ -430,6 +462,11 @@ export class SavedChartModel {
                     `${PinnedListTableName}.pinned_list_uuid`,
                     `${PinnedChartTableName}.pinned_list_uuid`,
                 )
+                .leftJoin(
+                    SavedChartVersionSqlRunnerTableName,
+                    `${SavedChartVersionSqlRunnerTableName}.saved_queries_version_id`,
+                    `saved_queries_versions.saved_queries_version_id`,
+                )
                 .select<
                     (DbSavedChartDetails & {
                         space_uuid: string;
@@ -442,6 +479,7 @@ export class SavedChartModel {
                     `${SavedChartsTableName}.saved_query_uuid`,
                     `${SavedChartsTableName}.name`,
                     `${SavedChartsTableName}.description`,
+                    `${SavedChartsTableName}.type`,
                     `${SavedChartsTableName}.dashboard_uuid`,
                     `${DashboardsTableName}.name as dashboardName`,
                     'saved_queries_versions.saved_queries_version_id',
@@ -459,6 +497,7 @@ export class SavedChartModel {
                     `${SpaceTableName}.space_uuid`,
                     `${SpaceTableName}.name as spaceName`,
                     `${PinnedListTableName}.pinned_list_uuid`,
+                    `${SavedChartVersionSqlRunnerTableName}.sql`,
                 ])
                 .where(
                     `${SavedChartsTableName}.saved_query_uuid`,
@@ -583,6 +622,8 @@ export class SavedChartModel {
                 projectUuid: savedQuery.project_uuid,
                 name: savedQuery.name,
                 description: savedQuery.description,
+                type: savedQuery.type,
+                sql: savedQuery.sql ?? undefined,
                 tableName: savedQuery.explore_name,
                 updatedAt: savedQuery.created_at,
                 updatedByUser: {

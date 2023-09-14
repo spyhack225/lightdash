@@ -17,6 +17,7 @@ type InsertChartInSpace = Pick<
     DbSavedChart,
     | 'name'
     | 'description'
+    | 'type'
     | 'last_version_chart_kind'
     | 'last_version_updated_by_user_uuid'
 > & {
@@ -28,6 +29,7 @@ type InsertChartInDashboard = Pick<
     DbSavedChart,
     | 'name'
     | 'description'
+    | 'type'
     | 'last_version_chart_kind'
     | 'last_version_updated_by_user_uuid'
 > & {
@@ -60,6 +62,7 @@ export type DbSavedChart = {
     space_id: number | null;
     dashboard_uuid: string | null;
     name: string;
+    type: 'explorer' | 'sql_runner';
     created_at: Date;
     description: string | undefined;
     last_version_chart_kind: ChartKind;
@@ -109,6 +112,26 @@ type DbSavedChartVersionField = {
 export type CreateDbSavedChartVersionField = Pick<
     DbSavedChartVersionField,
     'saved_queries_version_id' | 'name' | 'field_type' | 'order'
+>;
+
+export const SavedChartVersionSqlRunnerTableName =
+    'saved_queries_version_sql_runner';
+type DbSavedChartVersionSqlRunner = {
+    saved_queries_version_sql_runner_id: number;
+    saved_queries_version_id: number;
+    sql: string;
+    explore_name: string;
+    explore: string;
+};
+
+export type CreateSavedChartVersionSqlRunner = Pick<
+    DbSavedChartVersionSqlRunner,
+    'sql' | 'explore' | 'explore_name' | 'saved_queries_version_id'
+>;
+
+export type SavedChartVersionSqlRunnerTable = Knex.CompositeTableType<
+    DbSavedChartVersionSqlRunner,
+    CreateSavedChartVersionSqlRunner
 >;
 
 export const SavedChartVersionFieldsTableName = 'saved_queries_version_fields';

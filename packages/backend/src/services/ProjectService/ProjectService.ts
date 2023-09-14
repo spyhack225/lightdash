@@ -896,6 +896,33 @@ export class ProjectService {
             chart_uuid: chartUuid,
         };
 
+        if (savedChart.type === 'sql_runner') {
+            const { warehouseClient, sshTunnel } =
+                await this._getWarehouseClient(projectUuid);
+            const results = await warehouseClient.runQuery(
+                savedChart.sql!,
+                queryTags,
+            );
+            await sshTunnel.disconnect();
+            return {
+                rows: results.rows.map((row) =>
+                    Object.keys(row).reduce((acc, columnName) => {
+                        const raw = row[columnName];
+                        return {
+                            ...acc,
+                            [`sql_runner_${columnName}`]: {
+                                value: {
+                                    raw,
+                                    formatted: `${raw}`,
+                                },
+                            },
+                        };
+                    }, {}),
+                ),
+                metricQuery,
+            };
+        }
+
         return this.runQueryAndFormatRows(
             user,
             metricQuery,

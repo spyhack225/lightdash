@@ -89,6 +89,8 @@ import {
     SavedChartVersionFieldsTableName,
     SavedChartVersionSortsTable,
     SavedChartVersionSortsTableName,
+    SavedChartVersionSqlRunnerTable,
+    SavedChartVersionSqlRunnerTableName,
     SavedChartVersionsTable,
     SavedChartVersionsTableName,
     SavedQueryTableCalculationTable,
@@ -216,5 +218,6 @@ declare module 'knex/types/tables' {
         [SshKeyPairTableName]: SshKeyPairTable;
         [UserAttributesTable]: DbUserAttribute;
         [OrganizationMemberUserAttributesTable]: DbOrganizationMemberUserAttribute;
+        [SavedChartVersionSqlRunnerTableName]: SavedChartVersionSqlRunnerTable;
     }
 }

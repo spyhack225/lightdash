@@ -30,7 +30,10 @@ import {
 import { Knex } from 'knex';
 import { DatabaseError } from 'pg';
 import { LightdashConfig } from '../../config/parseConfig';
-import { DbDashboard } from '../../database/entities/dashboards';
+import {
+    DashboardsTableName,
+    DbDashboard,
+} from '../../database/entities/dashboards';
 import { OrganizationTableName } from '../../database/entities/organizations';
 import { PinnedListTableName } from '../../database/entities/pinnedList';
 import { DbProjectMembership } from '../../database/entities/projectMemberships';
@@ -42,7 +45,12 @@ import {
     DbProject,
     ProjectTableName,
 } from '../../database/entities/projects';
-import { DbSavedChart } from '../../database/entities/savedCharts';
+import {
+    DbSavedChart,
+    SavedChartsTableName,
+    SavedChartVersionSqlRunnerTableName,
+} from '../../database/entities/savedCharts';
+import { SpaceTableName } from '../../database/entities/spaces';
 import { DbUser } from '../../database/entities/users';
 import { WarehouseCredentialTableName } from '../../database/entities/warehouseCredentials';
 import Logger from '../../logging/logger';
@@ -515,6 +523,47 @@ export class ProjectModel {
         projectUuid: string,
         exploreName: string,
     ): Promise<Explore | ExploreError> {
+        if (exploreName.startsWith('sql_runner')) {
+            const row2 = await this.database(SavedChartsTableName)
+                .innerJoin(
+                    SpaceTableName,
+                    `${SpaceTableName}.space_id`,
+                    `${SavedChartsTableName}.space_id`,
+                )
+                .innerJoin(
+                    ProjectTableName,
+                    `${SpaceTableName}.project_id`,
+                    `${ProjectTableName}.project_id`,
+                )
+                .innerJoin(
+                    'saved_queries_versions',
+                    `${SavedChartsTableName}.saved_query_id`,
+                    'saved_queries_versions.saved_query_id',
+                )
+                .leftJoin(
+                    SavedChartVersionSqlRunnerTableName,
+                    `${SavedChartVersionSqlRunnerTableName}.saved_queries_version_id`,
+                    `saved_queries_versions.saved_queries_version_id`,
+                )
+                .select<{ explore: Explore }[]>([
+                    `${SavedChartVersionSqlRunnerTableName}.explore`,
+                ])
+                .where('project_uuid', projectUuid)
+                .andWhere(
+                    `${SavedChartVersionSqlRunnerTableName}.explore_name`,
+                    exploreName,
+                )
+                .first();
+
+            if (row2 === undefined) {
+                throw new NotExistsError(
+                    `Explore "${exploreName}" does not exist.`,
+                );
+            }
+            console.log('row2', row2);
+            return row2.explore;
+        }
+
         const row = await this.getExploreQueryBuilder(projectUuid).andWhereRaw(
             "explore->>'name' = ?",
             [exploreName],

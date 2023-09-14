@@ -60,7 +60,7 @@ export type ExploreError = Partial<Explore> &
 
 export const isExploreError = (
     explore: Explore | ExploreError,
-): explore is ExploreError => 'errors' in explore;
+): explore is ExploreError => !!explore && 'errors' in explore;
 
 type SummaryExploreFields = 'name' | 'label' | 'tags' | 'groupLabel';
 type SummaryExploreErrorFields = SummaryExploreFields | 'errors';

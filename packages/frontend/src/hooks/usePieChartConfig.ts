@@ -226,7 +226,7 @@ const usePieChartConfig: PieChartConfigFn = (
                 .filter(Boolean)
                 .join(' - ');
 
-            const value = Number(row[metricId].value.raw);
+            const value = Number(row[metricId]?.value.raw);
 
             return { name, value, row };
         });

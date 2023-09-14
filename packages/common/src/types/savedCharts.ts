@@ -1,6 +1,7 @@
 import assertUnreachable from '../utils/assertUnreachable';
 import { ViewStatistics } from './analytics';
 import { ConditionalFormattingConfig } from './conditionalFormatting';
+import { Explore } from './explore';
 import { CompactOrAlias } from './field';
 import { MetricQuery } from './metricQuery';
 import { UpdatedByUser } from './user';
@@ -262,6 +263,7 @@ export type SavedChart = {
     projectUuid: string;
     name: string;
     description?: string;
+    type: 'explorer' | 'sql_runner';
     tableName: string;
     metricQuery: MetricQuery;
     pivotConfig?: {
@@ -271,6 +273,7 @@ export type SavedChart = {
     tableConfig: {
         columnOrder: string[];
     };
+    sql?: string;
     updatedAt: Date;
     updatedByUser?: UpdatedByUser;
     organizationUuid: string;
@@ -286,12 +289,16 @@ type CreateChartBase = Pick<
     SavedChart,
     | 'name'
     | 'description'
+    | 'type'
+    | 'sql'
     | 'tableName'
     | 'metricQuery'
     | 'pivotConfig'
     | 'chartConfig'
     | 'tableConfig'
->;
+> & {
+    explore?: Explore;
+};
 
 export type CreateChartInSpace = CreateChartBase & {
     spaceUuid?: string;
@@ -309,6 +316,7 @@ export type CreateSavedChartVersion = Omit<
     SavedChart,
     | 'uuid'
     | 'name'
+    | 'type'
     | 'updatedAt'
     | 'projectUuid'
     | 'organizationUuid'
@@ -320,7 +328,9 @@ export type CreateSavedChartVersion = Omit<
     | 'firstViewedAt'
     | 'dashboardUuid'
     | 'dashboardName'
->;
+> & {
+    explore?: Explore;
+};
 
 export type UpdateSavedChart = Partial<
     Pick<SavedChart, 'name' | 'description' | 'spaceUuid'>
