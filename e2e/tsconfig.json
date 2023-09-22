@@ -1,5 +1,5 @@
 {
-    "extends": "./../../tsconfig.json",
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "target": "es5",
         "lib": ["es5", "dom"],
@@ -9,12 +9,10 @@
             "node",
             "cypress-file-upload"
         ],
-        "strictNullChecks": true /* Enable strict null checks. */,
+        "strictNullChecks": true /* Enable strict null checks. */
     },
     "include": ["**/*.ts"],
-    "references": [
-        {
-            "path": "../common"
-        }
-    ]
+    "paths": {
+        "@lightdash/common/*": ["/packages/common/*"]
+    }
 }

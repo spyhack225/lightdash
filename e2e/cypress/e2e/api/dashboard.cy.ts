@@ -10,8 +10,8 @@ import {
     SEED_PROJECT,
     UpdateDashboard,
 } from '@lightdash/common';
-import { isDashboardVersionedFields } from '@lightdash/common/src/types/dashboard';
-import { ChartType } from '@lightdash/common/src/types/savedCharts';
+import { isDashboardVersionedFields } from '@lightdash/common/dist/types/dashboard';
+import { ChartType } from '@lightdash/common/dist/types/savedCharts';
 
 const apiUrl = '/api/v1';
 

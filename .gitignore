@@ -8,9 +8,9 @@
 # testing
 /coverage
 /packages/**/coverage
-/packages/e2e/cypress/screenshots/**/*
-/packages/e2e/cypress/videos/**/*
-/packages/e2e/cypress/downloads/**/*
+/e2e/cypress/screenshots/**/*
+/e2e/cypress/videos/**/*
+/e2e/cypress/downloads/**/*
 
 # logs
 /packages/backend/logs

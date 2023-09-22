@@ -16,7 +16,7 @@
             "path": "./packages/warehouses"
         },
         {
-            "path": "./packages/e2e"
+            "path": "./e2e"
         }
     ],
     "exclude": ["dist", "build", "node_modules"]
