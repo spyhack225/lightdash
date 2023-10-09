@@ -69,7 +69,7 @@ import {
     ProjectType,
     WarehouseCredentials,
 } from './types/projects';
-import { ResultRow } from './types/results';
+import { ResultRow, ResultValue } from './types/results';
 import {
     ApiJobScheduledResponse,
     ApiJobStatusResponse,
@@ -789,6 +789,44 @@ export function formatRows(
                 },
             };
         }, {}),
+    );
+}
+
+export function formatRowsWithoutSpread(
+    rows: { [col: string]: any }[],
+    itemMap: Record<string, Field | TableCalculation>,
+): ResultRow[] {
+    return rows.map((row) =>
+        Object.keys(row).reduce<ResultRow>((acc, columnName) => {
+            const col = row[columnName];
+            const item = itemMap[columnName];
+            acc[columnName] = {
+                value: {
+                    raw: col,
+                    formatted: formatItemValue(item, col),
+                },
+            };
+            return acc;
+        }, {}),
+    );
+}
+
+export function formatRowsWithMap(
+    rows: { [col: string]: any }[],
+    itemMap: Record<string, Field | TableCalculation>,
+): Map<string, { value: ResultValue }>[] {
+    return rows.map((row) =>
+        Object.keys(row).reduce((acc, columnName) => {
+            const col = row[columnName];
+            const item = itemMap[columnName];
+            acc.set(columnName, {
+                value: {
+                    raw: col,
+                    formatted: formatItemValue(item, col),
+                },
+            });
+            return acc;
+        }, new Map()),
     );
 }
 
